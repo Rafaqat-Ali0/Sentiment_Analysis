@@ -38,7 +38,7 @@ This application leverages natural language processing (NLP) to automatically cl
 1. Clone the repository:
    ```bash
    git clone https://github.com/Rafaqat-Ali0/Sentiment-Analysis.git
-   cd Sentiment-Analysis
+   cd Sentiment_Analysis
    ```
 
 2. Create a virtual environment:
