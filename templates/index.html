@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sentiment Analysis</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding:50px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-image: url("{{ url_for('static', filename='Emojis.jpg') }}");
+            background-size:cover; 
+            background-position: center; 
+            background-repeat: no-repeat; 
+            justify-content: left;
+            overflow: hidden;
+        }
+
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+            width: 800px; /* Wider container */
+            text-align: center;
+        }
+
+        h1 {
+            margin-bottom: 20px;
+            font-size: 36px; /* Larger font size */
+            font-weight: bold;
+            color: #333;
+        }
+
+        input[type="text"] {
+            width: 90%;
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 10px;
+            border: 1px solid #ccc;
+            font-size: 16px;
+        }
+
+        button {
+            padding: 15px 30px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 18px;
+            width: 100%;
+            transition: background-color 0.3s ease;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        .result {
+            margin-top: 25px;
+            font-size: 18px;
+            text-align: left;
+            padding: 15px;
+            background-color: #f9f9f9;
+            border-radius: 10px;
+            border: 1px solid #ddd;
+            max-height: 400px; /* Set a maximum height */
+            overflow-y: auto; /* Enable vertical scrolling */
+        }
+
+        .review {
+            margin-bottom: 15px;
+            padding: 10px;
+            background-color: #fff;
+            border-radius: 5px;
+            border: 1px solid #eee;
+        }
+    </style>
+</head>
+<body >
+    <div class="container">
+        <h1>E-Commerce Feedback Sentiment Analysis</h1>
+        <input type="text" id="productUrl" placeholder="Paste the product link here...">
+        <button onclick="analyzeFeedback()">Analyze Feedback</button>
+        <div class="result" id="result"></div>
+    </div>
+    
+
+    <script>
+        async function analyzeFeedback() {
+            const productUrl = document.getElementById('productUrl').value;
+            if (!productUrl) {
+                alert('Please enter a product link!');
+                return;
+            }
+
+            const resultDiv = document.getElementById('result');
+            resultDiv.innerHTML = '<p>Analyzing reviews... Please wait.</p>';
+
+            const response = await fetch('http://127.0.0.1:5000/analyze', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ url: productUrl }),
+            });
+
+            const data = await response.json();
+            if (data.error) {
+                resultDiv.innerHTML = `<p style="color: red;">Error: ${data.error}</p>`;
+                return;
+            }
+
+            let html = '';
+            if (data.warning) {
+                html += `<p style="color: orange;"><strong>Warning:</strong> ${data.warning}</p>`;
+            }
+            html += `<p><strong>Average Polarity:</strong> ${data.average_polarity.toFixed(2)}</p>`;
+            html += `<p><strong>Average Subjectivity:</strong> ${data.average_subjectivity.toFixed(2)}</p>`;
+            html += '<h3>Reviews:</h3>';
+
+            data.reviews.forEach((review, index) => {
+                html += `
+                    <div class="review">
+                        <p><strong>Review ${index + 1}:</strong> ${review.review}</p>
+                        <p><strong>Sentiment:</strong> ${review.sentiment}</p>
+                        <p><strong>Polarity:</strong> ${review.polarity.toFixed(2)}</p>
+                        <p><strong>Subjectivity:</strong> ${review.subjectivity.toFixed(2)}</p>
+                    </div>
+                `;
+            });
+
+            resultDiv.innerHTML = html;
+        }
+    </script>
+</body>
+</html>
